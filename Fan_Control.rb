@@ -44,7 +44,7 @@ module R710_Tools
 
     # get current ambient temp via ipmi
     def get_ambient
-      output = `#{@ipmitool} -I lanplus -H #{@config[:host]} -U #{@config[:user]} -P #{@config[:pass]} sdr get "Ambient Temp"`
+      output = `#{@ipmitool} -U #{@config[:user]} -P #{@config[:pass]} sdr get "Ambient Temp"`
       result = {}
       output.each_line do |line|
         if line =~ /Sensor Reading\s+:\s+(\d+)/
@@ -69,7 +69,7 @@ module R710_Tools
 
     # get current fan speeds via ipmi
     def get_fan_speed
-      output = `#{@ipmitool} -I lanplus -H #{@config[:host]} -U #{@config[:user]} -P #{@config[:pass]} sdr type Fan`
+      output = `#{@ipmitool} -U #{@config[:user]} -P #{@config[:pass]} sdr type Fan`
       max_speed = 0
       min_speed = 15000
       output.each_line do |line|
@@ -87,21 +87,21 @@ module R710_Tools
     # @param target fan speed in percent of max speed as integer
     def set_fan_speed(speed_percent)
       target_speed = sprintf("%02X",speed_percent)
-      system("#{@ipmitool} -I lanplus -H #{@config[:host]} -U #{@config[:user]} -P #{@config[:pass]} raw 0x30 0x30 0x02 0xff 0x#{target_speed}")
+      system("#{@ipmitool} -U #{@config[:user]} -P #{@config[:pass]} raw 0x30 0x30 0x02 0xff 0x#{target_speed}")
       @last_speed_set = speed_percent
       puts "Fan speed set to #{speed_percent}% (0x#{target_speed})"
     end
 
     # set fan speed control to manual
     def set_fan_manual
-      system("#{@ipmitool} -I lanplus -H #{@config[:host]} -U #{@config[:user]} -P #{@config[:pass]} raw 0x30 0x30 0x01 0x00")
+      system("#{@ipmitool} -U #{@config[:user]} -P #{@config[:pass]} raw 0x30 0x30 0x01 0x00")
       @is_manual = true
       puts "Manual fan control active".colorize(:light_blue)
     end
 
     # set fan speed control to automatic
     def set_fan_automatic
-      system("#{@ipmitool} -I lanplus -H #{@config[:host]} -U #{@config[:user]} -P #{@config[:pass]} raw 0x30 0x30 0x01 0x01")
+      system("#{@ipmitool} -U #{@config[:user]} -P #{@config[:pass]} raw 0x30 0x30 0x01 0x01")
       @is_manual = false
       puts "Automatic fan control restored".colorize(:green)
     end
